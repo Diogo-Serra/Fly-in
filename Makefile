@@ -39,6 +39,7 @@ clean:
 clean-all: clean
 	@echo Cleaning environment ...
 	rm -rf solution
+	rm -rf maps
 	rm uv.lock
 
 lint:

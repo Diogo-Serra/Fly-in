@@ -2,8 +2,8 @@
 from .maps import Map
 from math import hypot
 from pathlib import Path
-from . import constants as RC
 from .pathfinder import Pathfinder
+from .resources import constants as RC
 
 try:
     import pygame
