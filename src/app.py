@@ -1,4 +1,5 @@
 # Application controller
+
 from .classes import FileHandler, Map, Renderer, Pathfinder
 from os import listdir, system
 

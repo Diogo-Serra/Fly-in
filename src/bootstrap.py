@@ -2,8 +2,8 @@
 
 from .app import run
 from pathlib import Path
+from .classes import DEFAULT_MAP
 from .classes import FileHandler, Map
-from .classes.constants import DEFAULT_MAP
 
 try:
     from pydantic import ValidationError

@@ -60,7 +60,7 @@ DEFAULT_MAP: dict[str, Any] = {
             "name": "waypoint1",
             "x": 1,
             "y": 0,
-            "metadata": {"zone": "blocked", "color": "blue"},
+            "metadata": {"color": "blue"},
         },
         {
             "name": "waypoint2",
