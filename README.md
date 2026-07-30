@@ -16,17 +16,19 @@ The routing problem is modeled as a flow network. Each hub is split into two nod
 
 Connections between hubs are added as bidirectional edges with their `max_link_capacity`. Priority zones are sorted to the front of the edge list so flow is directed through them first when capacity allows.
 
-Dinic's algorithm is then run on this graph to determine the maximum number of drones that can be routed simultaneously from source to sink. The BFS phase builds a level graph; the DFS phase pushes blocking flow along shortest augmenting paths. This runs in O(V² · E) time, which is efficient for the map sizes used here.
+Dinic's algorithm is then run on this graph to determine the maximum number of drones that can be routed simultaneously from source to sink. The BFS phase builds a level graph; the DFS phase pushes blocking flow along shortest augmenting paths. This runs in O(V² · E) time, a strongly polynomial bound that holds regardless of network size, making Dinic's algorithm an efficient general-purpose choice for max-flow computation.
 
 **Tick simulation**
 
-Once the level graph produces a set of valid paths, drones are assigned to routes and stepped forward one hub per turn. Each turn is a "tick". The simulation records which hub each drone occupies at every tick, producing a list of states used by the renderer.
+Each augmenting path found while running Dinic's algorithm is recorded as a drone route the moment its flow is confirmed. Drones are assigned to these routes round-robin and stepped forward one hub per turn (a "tick"); a drone is held back a turn if its next hub or connection is already at capacity. The simulation records which hub each drone occupies at every tick, producing the list of states used by the renderer and written to the solution file.
 
 **Zone types**
 
 - `start` / `end`: source and sink of the flow network; capacity is treated as unlimited.
 - `blocked`: excluded from the graph entirely; no flow passes through.
 - `priority`: edges touching these hubs are evaluated first during flow routing.
+- `restricted`: entering the hub costs one extra tick of transit delay.
+- `normal`: no special behavior (default when `zone` is omitted).
 
 ## Instructions
 
@@ -37,26 +39,26 @@ Once the level graph produces a set of valid paths, drones are assigned to route
 
 **Installation & Usage**
 
+This project uses `make` to drive setup and execution. The `start` target sets up `uv` (Astral's package manager), syncs dependencies from `pyproject.toml`, and launches the program.
+
 ```bash
 git clone https://github.com/Diogo-Serra/Fly-in
 cd Fly-in
 make start
 ```
 
-This project uses uv for dependency management. The install target sets up uv and syncs dependencies from `pyproject.toml`.
-
 The program presents an interactive menu:
 
 ```
 1. Select Map        - choose a map file from src/maps/
-2. See Map info      - display hub and drone details for the loaded map
+2. See Map info      - display hub details and drone count for the loaded map
 3. Navigation System - run the pathfinder and open the visual renderer
 0. Exit
 ```
 
 **Solution output**
 
-Each time the Navigation System runs, the computed drone routing is written to solution/<map_name>.txt at the project root. Each line represents one tick, listing drone moves (D<n>-<hub>) until all drones reach the goal.
+Each time the Navigation System runs, the computed drone routing is written to solution/<map_name>.txt at the project root. Each line represents one tick, listing drone moves (D<n>-<hub>) until all drones reach the goal. A move into a `restricted` hub is labeled with the connection used to reach it (e.g. `D1-start-junction`) instead of the hub name, so its extra transit delay is visible in the log.
 
 **Map file format**
 
@@ -74,13 +76,15 @@ connection: start-waypoint1 [max_link_capacity=2]
 connection: waypoint1-goal
 ```
 
-Supported hub types: `start_hub`, `hub`, `end_hub`. Optional metadata keys: `color`, `max_drones`, `zone` (`blocked` or `priority`). Connection metadata key: `max_link_capacity`.
+Supported hub types: `start_hub`, `hub`, `end_hub`. Optional metadata keys: `color`, `max_drones`, `zone` (`normal`, `blocked`, `restricted` or `priority`). Connection metadata key: `max_link_capacity`.
 
 ## Visual Representation
 
 The renderer is built with pygame and runs fullscreen. It draws the hub network as a graph, with hubs as labeled circles and connections as lines between them.
 
 During playback, each hub displays a badge showing how many drones currently occupy it. The drone count updates each tick so the flow of the fleet across the network is visible in real time.
+
+The layout scales automatically to fill the screen regardless of map size.
 
 **Controls**
 
@@ -89,13 +93,10 @@ During playback, each hub displays a badge showing how many drones currently occ
 | `P` | Play / pause |
 | `→` | Step forward one turn (while paused) |
 | `←` | Step back one turn (while paused) |
-| `S` | Solution page in pygame |
+| `S` | Solution overlay page |
 | `R` | Reset to turn 1 |
 | `L` | Toggle hub and edge labels |
 | `ESC` | Quit |
-
-
-The layout scales automatically to fill the screen regardless of map size.
 
 ## Resources
 
@@ -110,9 +111,8 @@ The layout scales automatically to fill the screen regardless of map size.
 **AI usage**
 
 AI (GitHub Copilot) was used during this project for the following tasks:
-- Understanding and exploring Dinic's algorithm (BFS level graph, DFS blocking flow, node-split technique)
-- Clarifying the correctness of the node-split construction for vertex-capacitated flow networks
+- Understanding and exploring Dinic's algorithm
+- Clarifying the correctness of the node-split construction
 - Reviewing edge case handling in the tick simulation (single-hub maps, blocked zones)
-- Suggesting the priority-key sort to bias flow toward priority zones without modifying the algorithm itself
 - Getting started with pygame (display setup, event loop, drawing primitives)
 - Writing the documentation and organizing the README
