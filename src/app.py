@@ -5,7 +5,7 @@ from os import listdir, system
 
 def run(script: str | None = None) -> int:
 
-    path_maps: str = "src/maps/"
+    path_maps: str = "./maps/"
     _map: Map | None = None
     handler: FileHandler | None = None
 

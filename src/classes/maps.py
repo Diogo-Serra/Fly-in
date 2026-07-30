@@ -1,4 +1,5 @@
-# Classes for Fly-in
+# Classes for Maps
+
 from re import fullmatch
 
 try:

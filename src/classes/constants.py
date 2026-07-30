@@ -1,4 +1,5 @@
-# Renderer constants for Fly-in
+# Constants for Fly-in
+from typing import Any
 
 # Hub geometry
 HUB_RADIUS = 38
@@ -40,4 +41,43 @@ COLOR_NAMES: dict[str, tuple[int, int, int]] = {
     "BROWN":     (139,  90,  43),
     "LIME":      (130, 210,  50),
     "GOLD":      (212, 175,  55),
+}
+
+# Default Map
+
+DEFAULT_MAP: dict[str, Any] = {
+    "name": "Simple Linear Path",
+    "difficulty": "Easy",
+    "nb_drones": 2,
+    "hub_list": [
+        {
+            "name": "start",
+            "x": 0,
+            "y": 0,
+            "metadata": {"hub_type": "start", "color": "green"},
+        },
+        {
+            "name": "waypoint1",
+            "x": 1,
+            "y": 0,
+            "metadata": {"zone": "blocked", "color": "blue"},
+        },
+        {
+            "name": "waypoint2",
+            "x": 2,
+            "y": 0,
+            "metadata": {"color": "blue"},
+        },
+        {
+            "name": "goal",
+            "x": 3,
+            "y": 0,
+            "metadata": {"hub_type": "end", "color": "red"},
+        },
+    ],
+    "connections": [
+        {"from_hub": "start", "to_hub": "waypoint1", "metadata": {}},
+        {"from_hub": "waypoint1", "to_hub": "waypoint2", "metadata": {}},
+        {"from_hub": "waypoint2", "to_hub": "goal", "metadata": {}},
+    ],
 }

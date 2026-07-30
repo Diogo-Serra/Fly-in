@@ -1,3 +1,5 @@
+# File Handler for Fly-in
+
 from os import listdir
 from pathlib import Path
 from .maps import Hub, Map, Connection
@@ -19,14 +21,14 @@ class FileHandler(BaseModel):
 
     @field_validator('filename', mode='after')
     def filename_validator(cls, filename: str) -> str:
-        if filename not in listdir("src/maps/"):
+        if filename not in listdir("./maps/"):
             raise FileNotFoundError(
-                f"Error: {filename} not found in src/maps/")
+                f"Error: {filename} not found in maps/")
         return filename
 
     def read_map_file(self) -> Map:
 
-        with open("src/maps/" + self.filename, 'r') as file:
+        with open("./maps/" + self.filename, 'r') as file:
             map_file: list[str] = file.read().split('\n')
         nb_drones_set = False
 
@@ -145,6 +147,47 @@ class FileHandler(BaseModel):
             nb_drones=self.nb_drones,
             connections=self.connections)
         return self.selected_map
+
+    @staticmethod
+    def write_map_file(nav_map: Map, filename: str | None = None) -> Path:
+        maps_dir = Path(__file__).parent.parent.parent / "maps"
+        maps_dir.mkdir(parents=True, exist_ok=True)
+
+        lines: list[str] = [
+            f"# {nav_map.difficulty}: {nav_map.name}",
+            f"nb_drones: {nav_map.nb_drones}",
+            "",
+        ]
+
+        keyword_by_hub_type = {'start': 'start_hub', 'end': 'end_hub'}
+        for hub in nav_map.hub_list:
+            meta = {
+                key: value for key, value in hub.metadata.items()
+                if key != 'hub_type'
+            }
+            keyword = keyword_by_hub_type.get(
+                hub.metadata.get('hub_type', ''), 'hub')
+            line = f"{keyword}: {hub.name} {hub.x} {hub.y}"
+            if meta:
+                tags = " ".join(
+                    f"{key}={value}" for key, value in meta.items())
+                line += f" [{tags}]"
+            lines.append(line)
+
+        lines.append("")
+
+        for conn in nav_map.connections:
+            line = f"connection: {conn.from_hub}-{conn.to_hub}"
+            if conn.metadata:
+                tags = " ".join(
+                    f"{key}={value}" for key, value in conn.metadata.items())
+                line += f" [{tags}]"
+            lines.append(line)
+
+        out_name = filename or f"{nav_map.name.replace(' ', '_').lower()}.txt"
+        out_path = maps_dir / out_name
+        out_path.write_text("\n".join(lines) + "\n")
+        return out_path
 
     @staticmethod
     def metadata_parser(
