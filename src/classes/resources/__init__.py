@@ -1,4 +1,4 @@
 from . import constants
-from .constants import DEFAULT_MAP
+from .maps_data import ALL_MAPS, DEFAULT_MAP
 
-__all__ = ["constants", "DEFAULT_MAP"]
+__all__ = ["constants", "ALL_MAPS", "DEFAULT_MAP"]

@@ -1,25 +1,24 @@
 # Constants for Fly-in
-from typing import Any
 
 # Hub geometry
 HUB_RADIUS = 38
+MAX_SCALE = 220
+MIN_HUB_RADIUS = 5
 DRONE_BADGE_R = 13
 HUB_SCALE_RATIO = 0.38
-MIN_HUB_RADIUS = 5
-MAX_SCALE = 220
 
 # Animation timing (milliseconds)
-TICK_DELAY_MS = 2000
 DWELL_RATIO = 0.55
 STEP_ANIM_MS = 450
+TICK_DELAY_MS = 2000
 
 # Background color
 BG_COLOR = (18, 18, 38)
 
 # Solution overlay colors
 SOLUTION_BG = (12, 12, 26, 235)
-SOLUTION_BORDER = (120, 120, 170)
 SOLUTION_TEXT = (220, 220, 240)
+SOLUTION_BORDER = (120, 120, 170)
 
 # Named hub colours
 COLOR_NAMES: dict[str, tuple[int, int, int]] = {
@@ -41,43 +40,4 @@ COLOR_NAMES: dict[str, tuple[int, int, int]] = {
     "BROWN":     (139,  90,  43),
     "LIME":      (130, 210,  50),
     "GOLD":      (212, 175,  55),
-}
-
-# Default Map
-
-DEFAULT_MAP: dict[str, Any] = {
-    "name": "Simple Linear Path",
-    "difficulty": "Easy",
-    "nb_drones": 2,
-    "hub_list": [
-        {
-            "name": "start",
-            "x": 0,
-            "y": 0,
-            "metadata": {"hub_type": "start", "color": "green"},
-        },
-        {
-            "name": "waypoint1",
-            "x": 1,
-            "y": 0,
-            "metadata": {"color": "blue"},
-        },
-        {
-            "name": "waypoint2",
-            "x": 2,
-            "y": 0,
-            "metadata": {"color": "blue"},
-        },
-        {
-            "name": "goal",
-            "x": 3,
-            "y": 0,
-            "metadata": {"hub_type": "end", "color": "red"},
-        },
-    ],
-    "connections": [
-        {"from_hub": "start", "to_hub": "waypoint1", "metadata": {}},
-        {"from_hub": "waypoint1", "to_hub": "waypoint2", "metadata": {}},
-        {"from_hub": "waypoint2", "to_hub": "goal", "metadata": {}},
-    ],
 }

@@ -1,6 +1,6 @@
 # Pathfinder - Dinic max-flow + tick-by-tick drone simulation
 
-from .maps import Connection, Map
+from .map import Connection, Map
 from collections import defaultdict, deque
 
 

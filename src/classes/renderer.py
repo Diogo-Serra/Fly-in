@@ -1,5 +1,5 @@
 # Renderer class for Fly-in
-from .maps import Map
+from .map import Map
 from math import hypot
 from pathlib import Path
 from .pathfinder import Pathfinder

@@ -2,7 +2,7 @@
 
 from os import listdir
 from pathlib import Path
-from .maps import Hub, Map, Connection
+from .map import Hub, Map, Connection
 
 try:
     from pydantic import BaseModel, Field, field_validator
