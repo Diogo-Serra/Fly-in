@@ -20,7 +20,7 @@ Dinic's algorithm is then run on this graph to determine the maximum number of d
 
 **Tick simulation**
 
-Each augmenting path found while running Dinic's algorithm is recorded as a drone route the moment its flow is confirmed. Drones are assigned to these routes round-robin and stepped forward one hub per turn (a "tick"); a drone is held back a turn if its next hub or connection is already at capacity. The simulation records which hub each drone occupies at every tick, producing the list of states used by the renderer and written to the solution file.
+Each augmenting path found while running Dinic's algorithm is recorded as a drone route the moment its flow is confirmed. When the fleet is larger than the number of augmenting paths found, a BFS-layered search enumerates additional simple hub paths tied for the same minimum hop count as the Dinic paths (never a longer detour) and merges them into the route pool, so drones can spread across genuinely equal-cost lanes that Dinic's single-path-per-augmentation approach would otherwise leave idle. Drones are assigned to routes in this pool round-robin and stepped forward one hub per turn (a "tick"); a drone is held back a turn if its next hub or connection is already at capacity. The simulation records which hub each drone occupies at every tick, producing the list of states used by the renderer and written to the solution file.
 
 **Zone types**
 
@@ -98,10 +98,9 @@ Each built-in map has an associated drone count and target turn count, used to g
 | Medium | Priority puzzle | 5 | ≤ 12 | 6 turns - PASS |
 | Hard | Maze nightmare | 8 | ≤ 30 | 9 turns - PASS |
 | Hard | Capacity hell | 12 | ≤ 35 | 10 turns - PASS |
-| Hard | Ultimate challenge | 15 | ≤ 45 | 26 turns - PASS |
-| Challenger | The Impossible Dream | 25 | 45 (reference record) | 67 turns - FAIL |
+| Hard | Ultimate challenge | 15 | ≤ 45 | 27 turns - PASS |
+| Challenger | The Impossible Dream | 25 | 45 (reference record) | 43 turns - PASS |
 
-Couldn't route more than 1 drone concurrently through "The Impossible Dream" map. Flow = 1, which by max-flow min-cut duality suggests a genuine topology bottleneck rather than a DFS bug.
 
 ## Visual Representation
 

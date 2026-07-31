@@ -368,41 +368,49 @@ class Renderer:
         prog = self._anim_progress if has_next else 0.0
         hub_by_name = {h.name: h for h in self.nav_map.hub_list}
 
-        def _badge(name: str, n: int) -> None:
-            hub = hub_by_name.get(name)
-            if not hub:
-                return
-            sx, sy = self._to_screen(hub.x, hub.y)
-            bx = sx + int(self._hub_radius * 0.72)
-            by = sy - int(self._hub_radius * 0.72)
+        def _pos(entry: str | tuple[str, str]) -> tuple[int, int] | None:
+            if isinstance(entry, tuple):
+                ha, hb = hub_by_name.get(entry[0]), hub_by_name.get(entry[1])
+                if not (ha and hb):
+                    return None
+                ax, ay = self._to_screen(ha.x, ha.y)
+                bx, by = self._to_screen(hb.x, hb.y)
+                return (ax + bx) // 2, (ay + by) // 2
+            hub = hub_by_name.get(entry)
+            return self._to_screen(hub.x, hub.y) if hub else None
+
+        def _badge(pos: tuple[int, int], n: int) -> None:
+            bx = pos[0] + int(self._hub_radius * 0.72)
+            by = pos[1] - int(self._hub_radius * 0.72)
             r = self._drone_badge_r
             self._draw_diamond(RC.DRONE_COLOR, (bx, by), r)
             surf = self._font_hub_inner.render(str(n), True, (255, 255, 255))
             self._blit_centered(surf, bx, by)
 
         if prog > 0.0 and nxt is not None:
-            at_rest: dict[str, int] = {}
-            for c, nxt_name in zip(cur, nxt):
-                if c == nxt_name:
+            at_rest: dict[str | tuple[str, str], int] = {}
+            for c, n in zip(cur, nxt):
+                if c == n:
                     at_rest[c] = at_rest.get(c, 0) + 1
-                else:
-                    ha = hub_by_name.get(c)
-                    hb = hub_by_name.get(nxt_name)
-                    if ha and hb:
-                        ax, ay = self._to_screen(ha.x, ha.y)
-                        bx, by = self._to_screen(hb.x, hb.y)
-                        dx = int(ax + (bx - ax) * prog)
-                        dy = int(ay + (by - ay) * prog)
-                        r = max(11, self._drone_badge_r - 1)
-                        self._draw_diamond(RC.DRONE_COLOR, (dx, dy), r)
-            for name, n in at_rest.items():
-                _badge(name, n)
+                    continue
+                pa, pb = _pos(c), _pos(n)
+                if pa and pb:
+                    dx = int(pa[0] + (pb[0] - pa[0]) * prog)
+                    dy = int(pa[1] + (pb[1] - pa[1]) * prog)
+                    r = max(11, self._drone_badge_r - 1)
+                    self._draw_diamond(RC.DRONE_COLOR, (dx, dy), r)
+            for entry, n in at_rest.items():
+                pos = _pos(entry)
+                if pos:
+                    _badge(pos, n)
         else:
-            count: dict[str, int] = {}
-            for name in cur:
-                count[name] = count.get(name, 0) + 1
-            for name, n in count.items():
-                _badge(name, n)
+            count: dict[str | tuple[str, str], int] = {}
+            for entry in cur:
+                count[entry] = count.get(entry, 0) + 1
+            for entry, n in count.items():
+                pos = _pos(entry)
+                if pos:
+                    _badge(pos, n)
 
     # HUD overlays
 

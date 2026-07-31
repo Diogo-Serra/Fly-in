@@ -9,7 +9,7 @@ class Pathfinder:
 
     def __init__(self, nav_map: Map) -> None:
         self.nav_map = nav_map
-        self.ticks: list[list[str]] = []
+        self.ticks: list[list[str | tuple[str, str]]] = []
         self.total_ticks: int = 0
         self.flow_reached: int = 0
         self.end_name: str = ""
@@ -257,7 +257,10 @@ class Pathfinder:
 
         drone_pos = [0] * num_drones
         in_transit = [False] * num_drones
-        ticks = [[drone_paths[i][0] for i in range(num_drones)]]
+        transit_link: list[tuple[str, str] | None] = [None] * num_drones
+        ticks: list[list[str | tuple[str, str]]] = (
+            [[drone_paths[i][0] for i in range(num_drones)]]
+        )
         MAX_TICKS = (
             (max(len(p) for p in drone_paths) + num_drones) * (num_drones + 4)
         )
@@ -303,13 +306,16 @@ class Pathfinder:
                     if zone_of.get(nxt) == 'restricted':
                         reserved[nxt] += 1
                         in_transit[i] = True
+                        transit_link[i] = (cur, nxt)
                     else:
                         hub_occ[nxt] += 1
                         drone_pos[i] += 1
 
-            ticks.append(
-                [drone_paths[i][drone_pos[i]] for i in range(num_drones)]
-            )
+            ticks.append([
+                transit_link[i] if in_transit[i]
+                else drone_paths[i][drone_pos[i]]
+                for i in range(num_drones)
+            ])
 
         self.ticks = ticks
         self.total_ticks = len(ticks)
