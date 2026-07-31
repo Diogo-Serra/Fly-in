@@ -71,6 +71,10 @@ class Renderer:
         self._recompute_layout()
         self._show_labels = True
         self._show_solution: bool = False
+        self._show_info: bool = False
+        self._show_legend: bool = False
+        self._info_btn = pygame.Rect(0, 0, 0, 0)
+        self._legend_btn = pygame.Rect(0, 0, 0, 0)
         self._solution_lines: list[str] | None = None
         self._anim_progress = 0.0
         self._single_step = False
@@ -101,21 +105,10 @@ class Renderer:
         box_h = line_h * len(surfs) + pad * 2 - line_gap
         return surfs, box_w, box_h
 
-    def _layout_area(self, reserve: bool) -> tuple[float, float, float, float]:
-        if not reserve:
-            return (float(self._win_w - self._margin * 2),
-                    float(self._map_h - self._margin * 2), 0.0, 0.0)
-        pad = 20
-        left = self._legend_box_w + pad
-        top = max(self._info_box_h, self._legend_box_h) + pad
-        aw = max(100.0, self._win_w - self._margin * 2 - left
-                 - self._info_box_w - pad)
-        ah = max(100.0, self._map_h - self._margin * 2 - top)
-        return aw, ah, left, top
-
-    def _compute_scale(self, reserve: bool = False) -> float:
+    def _compute_scale(self) -> float:
         sx, sy = self._max_x - self._min_x, self._max_y - self._min_y
-        aw, ah, _, _ = self._layout_area(reserve)
+        aw = self._win_w - self._margin * 2
+        ah = self._map_h - self._margin * 2
         if sx > 0 and sy > 0:
             scale = min(aw / sx, ah / sy)
         elif sx > 0:
@@ -126,41 +119,23 @@ class Renderer:
             scale = RC.MAX_SCALE
         return min(scale, RC.MAX_SCALE)
 
-    def _apply_scale(self, reserve: bool = False) -> None:
+    def _apply_scale(self) -> None:
         _r = int(min(RC.HUB_RADIUS, self._scale * RC.HUB_SCALE_RATIO))
         self._hub_radius = max(RC.MIN_HUB_RADIUS, _r)
         self._drone_badge_r = max(
             12, int(RC.DRONE_BADGE_R * self._hub_radius / RC.HUB_RADIUS))
         self._content_w = (self._max_x - self._min_x) * self._scale
         self._content_h = (self._max_y - self._min_y) * self._scale
-        aw, ah, left, top = self._layout_area(reserve)
-        self._ox = self._margin + left + max(0.0, (aw - self._content_w) / 2)
-        self._oy = (self._panel_h + self._margin + top
-                    + max(0.0, (ah - self._content_h) / 2))
-
-    def _overlaps_ui_boxes(self) -> bool:
-        m = 14
-        boxes = (
-            (self._win_w - self._info_box_w - m, self._panel_h + m,
-             self._info_box_w, self._info_box_h),
-            (m, self._panel_h + m, self._legend_box_w, self._legend_box_h),
-        )
-        r = self._hub_radius
-        for hub in self.nav_map.hub_list:
-            sx, sy = self._to_screen(hub.x, hub.y)
-            for bx, by, bw, bh in boxes:
-                if (sx + r > bx and sx - r < bx + bw
-                        and sy + r > by and sy - r < by + bh):
-                    return True
-        return False
+        aw = self._win_w - self._margin * 2
+        ah = self._map_h - self._margin * 2
+        self._ox = self._margin + max(0.0, (aw - self._content_w) / 2)
+        pad_y = max(0.0, (ah - self._content_h) / 2)
+        self._oy = self._panel_h + self._margin + pad_y
 
     def _recompute_layout(self) -> None:
         self._map_h = self._win_h - self._panel_h
         self._scale = self._compute_scale()
         self._apply_scale()
-        if self._overlaps_ui_boxes():
-            self._scale = self._compute_scale(reserve=True)
-            self._apply_scale(reserve=True)
 
     def _to_screen(self, x: int, y: int) -> tuple[int, int]:
         sx = int(self._ox + (x - self._min_x) * self._scale)
@@ -187,6 +162,12 @@ class Renderer:
                     self._screen = pygame.display.set_mode(
                         (self._win_w, self._win_h), pygame.RESIZABLE)
                     self._recompute_layout()
+                elif (event.type == pygame.MOUSEBUTTONDOWN
+                        and event.button == 1):
+                    if self._info_btn.collidepoint(event.pos):
+                        self._show_info = not self._show_info
+                    elif self._legend_btn.collidepoint(event.pos):
+                        self._show_legend = not self._show_legend
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
@@ -243,8 +224,9 @@ class Renderer:
             self._draw_hubs()
             self._draw_drones()
             self._draw_panel()
-            self._draw_map_info()
-            if self._show_labels:
+            if self._show_info:
+                self._draw_map_info()
+            if self._show_legend:
                 self._draw_legend()
             if self._show_solution:
                 self._draw_solution_overlay()
@@ -425,17 +407,15 @@ class Renderer:
     # HUD overlays
 
     def _draw_map_info(self) -> None:
-        margin = 14
-        bx = self._win_w - self._info_box_w - margin
-        by = self._panel_h + margin
+        bx = min(self._info_btn.x, self._win_w - self._info_box_w - 4)
         self._draw_box(
-            bx, by, self._info_box_w, self._info_box_h, self._info_surfs)
+            bx, self._panel_h + 4, self._info_box_w, self._info_box_h,
+            self._info_surfs)
 
     def _draw_legend(self) -> None:
-        margin = 14
-        bx, by = margin, self._panel_h + margin
+        bx = min(self._legend_btn.x, self._win_w - self._legend_box_w - 4)
         self._draw_box(
-            bx, by, self._legend_box_w, self._legend_box_h,
+            bx, self._panel_h + 4, self._legend_box_w, self._legend_box_h,
             self._legend_surfs)
 
     def _draw_solution_overlay(self) -> None:
@@ -452,35 +432,12 @@ class Renderer:
             "Solution (S to close)", True, (255, 255, 255))
         self._screen.blit(title, (bx + pad, by + pad))
 
-        content_top = by + pad + title.get_height() + line_gap
-        content_h = by + box_h - pad - content_top
-        available_w = box_w - pad * 2
+        y = by + pad + title.get_height() + line_gap
         line_h = self._font_sm.get_height() + line_gap
-        max_lines = max(1, content_h // line_h)
-
-        labeled = [f"T{i+1}: {line}" for i, line in enumerate(lines)]
-        too_tall = len(labeled) > max_lines
-        too_wide = any(
-            self._font_sm.size(text)[0] > available_w for text in labeled
-        )
-
-        if too_tall or too_wide:
-            name = self.nav_map.name.replace(' ', '_').lower()
-            msg_lines = [
-                "Solution too large to display here.",
-                f"Check the full file at: solution/{name}.txt",
-            ]
-            y = content_top + (content_h - len(msg_lines) * line_h) // 2
-            for msg in msg_lines:
-                surf = self._font_sm.render(msg, True, RC.SOLUTION_TEXT)
-                self._blit_centered(
-                    surf, bx + box_w // 2, y + surf.get_height() // 2)
-                y += line_h
-            return
-
-        y = content_top
-        for text in labeled:
-            surf = self._font_sm.render(text, True, RC.SOLUTION_TEXT)
+        max_lines = max(1, (by + box_h - pad - y) // line_h)
+        for i, line in enumerate(lines[:max_lines]):
+            surf = self._font_sm.render(
+                f"T{i + 1}: {line}", True, RC.SOLUTION_TEXT)
             self._screen.blit(surf, (bx + pad, y))
             y += line_h
 
@@ -500,6 +457,17 @@ class Renderer:
         self._show_solution = not self._show_solution
         if self._show_solution:
             self._load_solution_lines()
+
+    def _draw_toggle_btn(
+        self, label: str, x: int, active: bool
+    ) -> pygame.Rect:
+        surf = self._font_sm.render(label, True, (230, 230, 245))
+        rect = pygame.Rect(x, 10, surf.get_width() + 16, self._panel_h - 20)
+        fill = (70, 70, 120, 230) if active else (30, 30, 50, 200)
+        self._draw_bg_box(rect.x, rect.y, rect.w, rect.h, fill,
+                          (120, 120, 170, 220))
+        self._blit_centered(surf, rect.centerx, rect.centery)
+        return rect
 
     def _draw_panel(self) -> None:
         pygame.draw.rect(
@@ -521,3 +489,7 @@ class Renderer:
         self._screen.blit(tick_surf, (14, ty))
         self._blit_centered(
             self._opts_surf, self._win_w // 2, self._panel_h * 3 // 4)
+        self._legend_btn = self._draw_toggle_btn(
+            "Legend", self._win_w - 90, self._show_legend)
+        self._info_btn = self._draw_toggle_btn(
+            "Info", self._legend_btn.x - 80, self._show_info)
