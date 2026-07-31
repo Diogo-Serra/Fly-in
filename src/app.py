@@ -1,7 +1,8 @@
 # Application controller
 
-from .classes import FileHandler, Map, Renderer, Pathfinder
 from os import listdir, system
+from .classes.resources import benchmark
+from .classes import FileHandler, Map, Renderer, Pathfinder
 
 
 def run(script: str | None = None) -> int:
@@ -14,8 +15,8 @@ def run(script: str | None = None) -> int:
             === Fly-in - Drone System ===
 
             1. Select Map
-            2. See Map info
-            3. Navigation System
+            2. Rendering Map solution
+            3. Benchmark Fly-in
             0. Exit
 
     """
@@ -36,11 +37,6 @@ def run(script: str | None = None) -> int:
                 _map = handler.read_map_file()
                 print(f"Map Selected: {_map.name}")
             case "2":
-                if not _map:
-                    print("Select a map first (option 1).")
-                else:
-                    _map.map_info()
-            case "3":
                 if not _map or not handler:
                     print("Select a map first (option 1).")
                     continue
@@ -51,6 +47,8 @@ def run(script: str | None = None) -> int:
                     continue
                 handler.write_solution(pf.ticks, pf.end_name)
                 Renderer(_map, pf).run()
+            case "3":
+                benchmark.main()
             case "0":
                 break
             case _:

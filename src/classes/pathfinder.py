@@ -110,9 +110,7 @@ class Pathfinder:
         priority_names = {
             hubs[i].name for i, z in enumerate(zones) if z == 'priority'
         }
-        # Hubs that choke throughput: restricted (extra transit tick) or
-        # capacity-1 (single-file). Edges touching these are explored last
-        # so equal-length augmenting paths prefer smoother routes first.
+
         choke_names = {
             h.name for h in hubs
             if h.zone == 'restricted' or h.capacity == 1

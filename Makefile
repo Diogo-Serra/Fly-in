@@ -29,6 +29,9 @@ start: install
 run:
 	$(UV) run fly-in.py
 
+benchmark:
+	$(UV) run python -m src.classes.resources.benchmark
+
 debug:
 	$(UV) python3 -m pdb fly-in.py
 
