@@ -101,7 +101,7 @@ Each built-in map has an associated drone count and target turn count, used to g
 | Hard | Ultimate challenge | 15 | ≤ 45 | 26 turns - PASS |
 | Challenger | The Impossible Dream | 25 | 45 (reference record) | 67 turns - FAIL |
 
-9 of 10 targets are met by the current implementation. The Challenger map, "The Impossible Dream", is a deliberately near-worst-case stress test: its topology forces every drone through a single route (max concurrent flow = 1) with several serial single-drone-capacity chokepoints, some of which are also `restricted` zones.
+Couldn't route more than 1 drone concurrently through "The Impossible Dream" map. Flow = 1, which by max-flow min-cut duality suggests a genuine topology bottleneck rather than a DFS bug.
 
 ## Visual Representation
 
@@ -116,8 +116,8 @@ The layout scales automatically to fill the screen regardless of map size.
 | Key | Action |
 |-----|--------|
 | `P` | Play / pause |
-| `→` | Step forward one turn (while paused) |
-| `←` | Step back one turn (while paused) |
+| `->` | Step forward one turn (while paused) |
+| `<-` | Step back one turn (while paused) |
 | `S` | Solution overlay page |
 | `R` | Reset to turn 1 |
 | `L` | Toggle hub and edge labels |
@@ -125,11 +125,21 @@ The layout scales automatically to fill the screen regardless of map size.
 
 ## Resources
 
-- Dinic's algorithm - [Baeldung](https://www.baeldung.com/cs/dinics)
-- Dinic's algorithm - [Wikipedia](https://en.wikipedia.org/wiki/Dinic%27s_algorithm)
-- Dinic's algorithm (video) - [YouTube](https://www.youtube.com/watch?v=FfWsCRIHnQ4)
-- Dinic's algorithm (video 2) - [YouTube](https://www.youtube.com/watch?v=M6cm8UeeziI)
-- pygame documentation - [https://www.pygame.org/docs/](https://www.pygame.org/docs/)
+**Dinic's Algorithm**
+
+- Baeldung article - [Baeldung](https://www.baeldung.com/cs/dinics)
+- GeekforGeeks article - [GeekforGeeks](https://www.geeksforgeeks.org/dsa/dinics-algorithm-maximum-flow/)
+- Video tutorial 1 - [YouTube](https://www.youtube.com/watch?v=FfWsCRIHnQ4)
+- Video tutorial 2 - [YouTube](https://www.youtube.com/watch?v=M6cm8UeeziI)
+
+**Pygame**
+
+- Documentation - [Pygame](https://www.pygame.org/docs/)
+- Video tutorial 1 - [YouTube](https://www.youtube.com/watch?v=AY9MnQ4x3zk)
+- Video tutorial 2 - [YouTube](https://www.youtube.com/watch?v=blLLtdv4tvo)
+
+**Python Tools (pydantic, uv)**
+
 - pydantic documentation - [https://docs.pydantic.dev/](https://docs.pydantic.dev/)
 - uv documentation - [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/)
 
