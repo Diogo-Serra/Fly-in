@@ -86,6 +86,67 @@ class Pathfinder:
                 path.append(name)
         self._paths.extend([path] * flow_sent)
 
+    def _equal_length_hub_paths(
+        self,
+        blocked_hubs: set[int],
+        hub_index: dict[str, int],
+        start_name: str,
+        end_name: str,
+        limit: int = 16,
+    ) -> list[list[str]]:
+        adjacency: defaultdict[str, set[str]] = defaultdict(set)
+        for conn in self.nav_map.connections:
+            hub_a = hub_index.get(conn.from_hub)
+            hub_b = hub_index.get(conn.to_hub)
+            if hub_a is None or hub_b is None:
+                continue
+            if hub_a in blocked_hubs or hub_b in blocked_hubs:
+                continue
+            adjacency[conn.from_hub].add(conn.to_hub)
+            adjacency[conn.to_hub].add(conn.from_hub)
+
+        def _bfs_dist(source: str) -> dict[str, int]:
+            dist = {source: 0}
+            queue = deque([source])
+            while queue:
+                node = queue.popleft()
+                for neighbor in adjacency[node]:
+                    if neighbor not in dist:
+                        dist[neighbor] = dist[node] + 1
+                        queue.append(neighbor)
+            return dist
+
+        dist_from_start = _bfs_dist(start_name)
+        dist_from_end = _bfs_dist(end_name)
+        if end_name not in dist_from_start:
+            return []
+        target_len = dist_from_start[end_name]
+
+        paths: list[list[str]] = []
+
+        def _dfs(node: str, path: list[str]) -> None:
+            if len(paths) >= limit:
+                return
+            if node == end_name:
+                paths.append(list(path))
+                return
+            for neighbor in adjacency[node]:
+                if neighbor in path:
+                    continue
+                if (dist_from_start.get(neighbor) != len(path)
+                        or dist_from_end.get(neighbor) is None
+                        or len(path) + dist_from_end[neighbor]
+                        != target_len):
+                    continue
+                path.append(neighbor)
+                _dfs(neighbor, path)
+                path.pop()
+                if len(paths) >= limit:
+                    return
+
+        _dfs(start_name, [start_name])
+        return paths
+
     # Build graph and route flow
 
     def _solve(self) -> None:
@@ -148,8 +209,20 @@ class Pathfinder:
             num_hubs + source_idx, sink_idx, self.nav_map.nb_drones
         )
 
+        route_pool = list(self._paths)
+        if route_pool and self.nav_map.nb_drones > len(route_pool):
+            alt_routes = self._equal_length_hub_paths(
+                blocked_hubs, hub_index, start.name, end.name
+            )
+            seen = {tuple(p) for p in route_pool}
+            for route in alt_routes:
+                key = tuple(route)
+                if key not in seen:
+                    seen.add(key)
+                    route_pool.append(route)
+
         self._simulate(
-            self._paths, hub_names[source_idx], hub_names[sink_idx])
+            route_pool, hub_names[source_idx], hub_names[sink_idx])
 
     # Tick-by-tick simulation
 
