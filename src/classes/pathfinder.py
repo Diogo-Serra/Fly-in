@@ -110,6 +110,13 @@ class Pathfinder:
         priority_names = {
             hubs[i].name for i, z in enumerate(zones) if z == 'priority'
         }
+        # Hubs that choke throughput: restricted (extra transit tick) or
+        # capacity-1 (single-file). Edges touching these are explored last
+        # so equal-length augmenting paths prefer smoother routes first.
+        choke_names = {
+            h.name for h in hubs
+            if h.zone == 'restricted' or h.capacity == 1
+        }
 
         # Node-split graph: each hub i becomes i (in) and num_hubs+i (out)
 
@@ -122,7 +129,9 @@ class Pathfinder:
             self._add_edge(i, num_hubs + i, capacity)
 
         def _priority_key(conn: Connection) -> int:
-            return 0 if conn.touches(priority_names) else 1
+            if conn.touches(priority_names):
+                return 0
+            return 2 if conn.touches(choke_names) else 1
 
         for conn in sorted(self.nav_map.connections, key=_priority_key):
             hub_a, hub_b = hub_index[conn.from_hub], hub_index[conn.to_hub]

@@ -50,7 +50,7 @@ make start
 The program presents an interactive menu:
 
 ```
-1. Select Map        - choose a map file from src/maps/
+1. Select Map        - choose a map file from maps/
 2. See Map info      - display hub details and drone count for the loaded map
 3. Navigation System - run the pathfinder and open the visual renderer
 0. Exit
@@ -60,9 +60,15 @@ The program presents an interactive menu:
 
 Each time the Navigation System runs, the computed drone routing is written to solution/<map_name>.txt at the project root. Each line represents one tick, listing drone moves (D<n>-<hub>) until all drones reach the goal. A move into a `restricted` hub is labeled with the connection used to reach it (e.g. `D1-start-junction`) instead of the hub name, so its extra transit delay is visible in the log.
 
+**Maps**
+
+Map files are plain text and live in `maps/` at the project root. This project have a built-in library of ten maps, defined in `src/classes/resources/maps_data.py` and exposed as `DEFAULT_MAP` / `ALL_MAPS`, spanning Easy, Medium, Hard and Challenger difficulty tiers. These maps, and their filenames, match the ones given in the subject requirements for evaluation.
+
+On startup, `ensure_default_map()` (in `src/bootstrap.py`) checks whether `maps/` already contains any `.txt` files. If the folder is empty, it writes out every built-in map automatically. If `maps/` already has map files, nothing is generated, so custom maps are never overwritten and can be dropped into the folder freely, alongside or instead of the built-ins.
+
 **Map file format**
 
-Map files are plain text and placed in `src/maps/`. Example:
+Example:
 
 ```
 # Easy: Simple linear path
@@ -77,6 +83,25 @@ connection: waypoint1-goal
 ```
 
 Supported hub types: `start_hub`, `hub`, `end_hub`. Optional metadata keys: `color`, `max_drones`, `zone` (`normal`, `blocked`, `restricted` or `priority`). Connection metadata key: `max_link_capacity`.
+
+## Benchmarks
+
+Each built-in map has an associated drone count and target turn count, used to gauge routing efficiency across increasing difficulty tiers:
+
+| Tier | Map | Drones | Target turns | Result |
+|---|---|---:|---:|---|
+| Easy | Linear path | 2 | ≤ 6 | 3 turns - PASS |
+| Easy | Simple fork | 4 | ≤ 8 | 4 turns - PASS |
+| Easy | Basic capacity | 4 | ≤ 6 | 4 turns - PASS |
+| Medium | Dead end trap | 5 | ≤ 12 | 6 turns - PASS |
+| Medium | Circular loop | 6 | ≤ 15 | 7 turns - PASS |
+| Medium | Priority puzzle | 5 | ≤ 12 | 6 turns - PASS |
+| Hard | Maze nightmare | 8 | ≤ 30 | 9 turns - PASS |
+| Hard | Capacity hell | 12 | ≤ 35 | 10 turns - PASS |
+| Hard | Ultimate challenge | 15 | ≤ 45 | 26 turns - PASS |
+| Challenger | The Impossible Dream | 25 | 45 (reference record) | 67 turns - FAIL |
+
+9 of 10 targets are met by the current implementation. The Challenger map, "The Impossible Dream", is a deliberately near-worst-case stress test: its topology forces every drone through a single route (max concurrent flow = 1) with several serial single-drone-capacity chokepoints, some of which are also `restricted` zones.
 
 ## Visual Representation
 

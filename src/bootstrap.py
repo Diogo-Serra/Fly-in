@@ -2,8 +2,8 @@
 
 from .app import run
 from pathlib import Path
-from .classes import DEFAULT_MAP
 from .classes import FileHandler, Map
+from .classes import DEFAULT_MAP, ALL_MAPS, MAP_NAMES
 
 try:
     from pydantic import ValidationError
@@ -16,7 +16,15 @@ def ensure_default_map() -> None:
     maps_dir = Path(__file__).parent.parent / "maps"
     has_map_files = maps_dir.is_dir() and any(maps_dir.glob("*.txt"))
     if not has_map_files:
-        FileHandler.write_map_file(Map.model_validate(DEFAULT_MAP))
+        for map_data in ALL_MAPS.values():
+            nav_map = Map.model_validate(map_data)
+            _name = MAP_NAMES.get(nav_map.name)
+            FileHandler.write_map_file(
+                nav_map, filename=f"{_name}.txt" if _name else None)
+        default_map = Map.model_validate(DEFAULT_MAP)
+        _name = MAP_NAMES.get(default_map.name)
+        FileHandler.write_map_file(
+            default_map, filename=f"{_name}.txt" if _name else None)
 
 
 def initialize(argv: list[str]) -> None:

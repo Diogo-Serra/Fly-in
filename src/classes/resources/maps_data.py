@@ -2566,3 +2566,19 @@ ALL_MAPS: dict[str, dict[str, Any]] = {
         MAP_03_ULTIMATE_CHALLENGE,
     ]
 }
+
+# Short filenames matching the benchmark map names, keyed by each map's
+# full "name" field, so generated map files stay recognizable during
+# evaluation instead of using the long descriptive names.
+MAP_NAMES: dict[str, str] = {
+    "Simple Linear Path": "linear_path",
+    "Simple fork with two paths": "simple_fork",
+    "Basic capacity management": "basic_capacity",
+    "Dead end trap - drones might get stuck": "dead_end_trap",
+    "Circular loop with restricted zones": "circular_loop",
+    "Priority zones create optimal path challenges": "priority_puzzle",
+    "Complex maze with multiple dead ends and loops": "maze_nightmare",
+    "Extreme capacity constraints with timing challenges": "capacity_hell",
+    "THE ULTIMATE CHALLENGE - All tricks combined": "ultimate_challenge",
+    "THE IMPOSSIBLE DREAM": "the_impossible_dream",
+}
