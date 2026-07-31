@@ -1,11 +1,27 @@
 # Constants for Fly-in
 
+# Window Pygame
+WINDOW_W = 1440
+WINDOW_H = 900
+
 # Hub geometry
 HUB_RADIUS = 38
 MAX_SCALE = 220
 MIN_HUB_RADIUS = 5
-DRONE_BADGE_R = 13
+DRONE_BADGE_R = 16
 HUB_SCALE_RATIO = 0.38
+
+# Drone marker colour
+DRONE_COLOR = (205, 45, 45)
+
+# Single-letter zone/role badges shown in a hub's top-left corner
+ZONE_BADGE: dict[str, str] = {
+    'start': 'S',
+    'end': 'E',
+    'blocked': 'X',
+    'restricted': 'R',
+    'priority': 'P',
+}
 
 # Animation timing (milliseconds)
 DWELL_RATIO = 0.55
