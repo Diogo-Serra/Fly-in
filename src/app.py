@@ -1,8 +1,7 @@
 # Application controller
 
 from os import listdir, system
-from .classes.resources import benchmark
-from .classes import FileHandler, Map, Renderer, Pathfinder
+from .classes import FileHandler, Map, Renderer, Pathfinder, benchmark
 
 
 def run(script: str | None = None) -> int:
