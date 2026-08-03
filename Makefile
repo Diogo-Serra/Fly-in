@@ -29,7 +29,7 @@ start: install
 run:
 	$(UV) run fly-in.py
 
-benchmark:
+benchmark: install
 	$(UV) run python -m src.classes.resources.benchmark
 
 debug:
