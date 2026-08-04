@@ -232,7 +232,9 @@ class FileHandler(BaseModel):
             )
         return metadata_dict
 
-    def write_solution(self, ticks: list[list[str]], end_name: str) -> None:
+    def write_solution(
+        self, ticks: list[list[str | tuple[str, str]]], end_name: str
+    ) -> None:
         nav_map = self.selected_map
         if nav_map is None:
             return
@@ -258,6 +260,10 @@ class FileHandler(BaseModel):
                 if drone_idx in delivered:
                     continue
                 prev_hub, curr_hub = prev_tick[drone_idx], curr_tick[drone_idx]
+                prev_hub = prev_hub[1] if isinstance(
+                    prev_hub, tuple) else prev_hub
+                curr_hub = curr_hub[1] if isinstance(
+                    curr_hub, tuple) else curr_hub
                 if curr_hub == end_name:
                     delivered.add(drone_idx)
                     moves.append(f"D{drone_idx + 1}-{end_name}")

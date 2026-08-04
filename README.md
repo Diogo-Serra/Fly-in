@@ -24,7 +24,7 @@ Each augmenting path found while running Dinic's algorithm is recorded as a dron
 
 **Zone types**
 
-- `start` / `end`: source and sink of the flow network; capacity is treated as unlimited.
+- `start` / `end`: source and sink of the flow network; capacity is treated as unlimited (∞).
 - `blocked`: excluded from the graph entirely; no flow passes through.
 - `priority`: edges touching these hubs are evaluated first during flow routing.
 - `restricted`: entering the hub costs one extra tick of transit delay.

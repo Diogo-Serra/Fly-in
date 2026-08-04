@@ -399,18 +399,18 @@ class Renderer:
                     dy = int(pa[1] + (pb[1] - pa[1]) * prog)
                     r = max(11, self._drone_badge_r - 1)
                     self._draw_diamond(RC.DRONE_COLOR, (dx, dy), r)
-            for entry, n in at_rest.items():
+            for entry, cnt in at_rest.items():
                 pos = _pos(entry)
                 if pos:
-                    _badge(pos, n)
+                    _badge(pos, cnt)
         else:
             count: dict[str | tuple[str, str], int] = {}
             for entry in cur:
                 count[entry] = count.get(entry, 0) + 1
-            for entry, n in count.items():
+            for entry, cnt in count.items():
                 pos = _pos(entry)
                 if pos:
-                    _badge(pos, n)
+                    _badge(pos, cnt)
 
     # HUD overlays
 

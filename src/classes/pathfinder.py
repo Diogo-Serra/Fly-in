@@ -312,7 +312,7 @@ class Pathfinder:
                         drone_pos[i] += 1
 
             ticks.append([
-                transit_link[i] if in_transit[i]
+                link if (link := transit_link[i]) is not None
                 else drone_paths[i][drone_pos[i]]
                 for i in range(num_drones)
             ])
