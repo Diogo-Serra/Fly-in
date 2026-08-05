@@ -14,7 +14,7 @@ HUB_SCALE_RATIO = 0.38
 # Drone marker colour
 DRONE_COLOR = (205, 45, 45)
 
-# Single-letter zone/role badges shown in a hub's top-left corner
+# Single-letter zone/role badges
 ZONE_BADGE: dict[str, str] = {
     'start': 'S',
     'end': 'E',
