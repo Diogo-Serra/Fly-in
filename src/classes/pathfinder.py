@@ -277,6 +277,7 @@ class Pathfinder:
                 if in_transit[i]:
                     drone_pos[i] += 1
                     in_transit[i] = False
+                    transit_link[i] = None
                     just_arrived.add(i)
 
             hub_occ: defaultdict[str, int] = defaultdict(int)

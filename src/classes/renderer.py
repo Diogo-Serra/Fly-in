@@ -487,9 +487,9 @@ class Renderer:
         self._blit_centered(
             self._title_surf, self._win_w // 2, self._panel_h // 4)
         state = "PLAYING" if self._playing else "PAUSED"
-        total = self._pf.total_ticks
+        total = self._pf.total_ticks - 1
         flow = self._pf.flow_reached
-        tick_txt = (f"{state}  |  Turn {self._tick + 1} / {total}"
+        tick_txt = (f"{state}  |  Turn {self._tick} / {total}"
                     f"  |  Flow {flow} / {self.nav_map.nb_drones}")
         tick_col = (100, 220, 140) if self._playing else (220, 180, 80)
         tick_surf = self._font_sm.render(tick_txt, True, tick_col)
