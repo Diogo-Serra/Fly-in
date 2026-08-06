@@ -17,12 +17,6 @@ install:
 	$(ENV_PIP) install uv
 	$(UV) sync --no-dev
 
-install-dev:
-	@echo Preparing environment ...
-	python3 -m venv .venv
-	$(ENV_PIP) install uv
-	$(UV) sync
-
 start: install
 	$(UV) run fly-in.py
 
