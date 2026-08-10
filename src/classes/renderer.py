@@ -323,7 +323,7 @@ class Renderer:
                     'max_drones', '' if is_endpoint else '1')
                 if cap:
                     cap_surf = self._font_hub_inner.render(
-                        str(cap), True, (0, 0, 0))
+                        str(cap), True, (255, 255, 255))
                     self._blit_centered(cap_surf, sx, sy)
 
                 badge = self._badge_letter(hub)
