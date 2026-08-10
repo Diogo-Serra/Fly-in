@@ -184,7 +184,7 @@ class Pathfinder:
             if i in blocked_hubs:
                 continue
             capacity = (self.INF if i in (source_idx, sink_idx)
-                        else hub.capacity or self.INF)
+                        else hub.capacity or 1)
             self._add_edge(i, num_hubs + i, capacity)
 
         def _priority_key(conn: Connection) -> int:
@@ -245,7 +245,7 @@ class Pathfinder:
 
         zone_of = {h.name: h.zone for h in self.nav_map.hub_list}
         hub_cap: dict[str, int] = {
-            h.name: h.capacity or self.INF
+            h.name: h.capacity or 1
             for h in self.nav_map.hub_list
         }
         hub_cap[start_name] = hub_cap[end_name] = self.INF

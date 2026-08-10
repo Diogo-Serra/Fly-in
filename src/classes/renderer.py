@@ -16,7 +16,9 @@ class Renderer:
 
     @staticmethod
     def _resolve_color(name: str) -> tuple[int, int, int]:
-        return RC.COLOR_NAMES.get(name.upper(), (255, 255, 255))
+        if not name:
+            return RC.NO_COLOR
+        return RC.COLOR_NAMES.get(name.upper(), RC.NO_COLOR)
 
     def _badge_letter(self, hub: Hub) -> str | None:
         return (
@@ -308,7 +310,7 @@ class Renderer:
         border = max(1, r // 10)
         for hub in self.nav_map.hub_list:
             sx, sy = self._to_screen(hub.x, hub.y)
-            color = self._resolve_color(hub.metadata.get('color', 'white'))
+            color = self._resolve_color(hub.metadata.get('color', ''))
             pygame.draw.circle(self._screen, color, (sx, sy), r)
             pygame.draw.circle(
                 self._screen, (255, 255, 255), (sx, sy), r, border)
@@ -316,7 +318,9 @@ class Renderer:
                 continue
 
             if r >= 14:
-                cap = hub.metadata.get('max_drones', '')
+                is_endpoint = hub.hub_type in ('start', 'end')
+                cap = hub.metadata.get(
+                    'max_drones', '' if is_endpoint else '1')
                 if cap:
                     cap_surf = self._font_hub_inner.render(
                         str(cap), True, (0, 0, 0))
@@ -344,11 +348,14 @@ class Renderer:
         return None
 
     def _draw_hover_tooltip(self, hub: Hub, pos: tuple[int, int]) -> None:
-        cap = hub.metadata.get('max_drones', 'unlimited')
+        is_endpoint = hub.hub_type in ('start', 'end')
+        cap = hub.metadata.get(
+            'max_drones', 'unlimited' if is_endpoint else '1')
         lines = [hub.name, f"Coords: ({hub.x}, {hub.y})"]
         if hub.hub_type:
             lines.append(f"Type: {hub.hub_type}")
         lines.append(f"Zone: {hub.zone or 'normal'}")
+        lines.append(f"Color: {hub.metadata.get('color', 'none')}")
         lines.append(f"Capacity: {cap}")
 
         surfs, box_w, box_h = self._measure_lines(lines, (230, 230, 245))

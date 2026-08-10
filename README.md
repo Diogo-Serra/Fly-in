@@ -12,7 +12,7 @@ The program reads a custom map file that defines the network topology, zone type
 
 **Pathfinding - Dinic's max-flow algorithm**
 
-The routing problem is modeled as a flow network. Each hub is split into two nodes (in-node and out-node) connected by an internal edge whose capacity equals the hub's `max_drones` limit. This node-split technique enforces per-hub occupancy constraints within the standard max-flow framework.
+The routing problem is modeled as a flow network. Each hub is split into two nodes (in-node and out-node) connected by an internal edge whose capacity equals the hub's `max_drones` limit (default: 1, except `start`/`end` hubs which are always unlimited). This node-split technique enforces per-hub occupancy constraints within the standard max-flow framework.
 
 Connections between hubs are added as bidirectional edges with their `max_link_capacity`. Priority zones are sorted to the front of the edge list so flow is directed through them first when capacity allows.
 
@@ -82,7 +82,12 @@ connection: start-waypoint1 [max_link_capacity=2]
 connection: waypoint1-goal
 ```
 
-Supported hub types: `start_hub`, `hub`, `end_hub`. Optional metadata keys: `color`, `max_drones`, `zone` (`normal`, `blocked`, `restricted` or `priority`). Connection metadata key: `max_link_capacity`.
+Supported hub types: `start_hub`, `hub`, `end_hub`. Optional metadata keys:
+- `color=<value>` (default: none) - name of the colour used to render the hub.
+- `max_drones=<number>` (default: 1) - maximum drones that can occupy this hub simultaneously. `start_hub`/`end_hub` are always unlimited regardless of this setting.
+- `zone` (`normal`, `blocked`, `restricted` or `priority`).
+
+Connection metadata key: `max_link_capacity`.
 
 ## Benchmarks
 

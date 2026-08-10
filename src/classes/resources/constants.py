@@ -56,4 +56,13 @@ COLOR_NAMES: dict[str, tuple[int, int, int]] = {
     "BROWN":     (139,  90,  43),
     "LIME":      (130, 210,  50),
     "GOLD":      (212, 175,  55),
+    "BLACK":     (20,   20,  25),
+    "MAROON":    (128,   0,   0),
+    "DARKRED":   (139,   0,   0),
+    "CRIMSON":   (220,  20,  60),
+    "VIOLET":    (170,  90, 220),
+    "RAINBOW":   (216,  60, 160),
 }
+
+# Fallback colour used when a hub has no 'color' metadata set
+NO_COLOR = (110, 110, 125)
